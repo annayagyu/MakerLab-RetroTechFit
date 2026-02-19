@@ -1,0 +1,53 @@
+# 💧 HydroSense: Documentação Técnica
+
+O **HydroSense** é o módulo de gestão hídrica inteligente do ecossistema Kite. Ele foca no monitoramento contínuo do fluxo de água para identificar vazamentos silenciosos, torneiras esquecidas ou rupturas de canos, efetuando o bloqueio automático do suprimento.
+
+## 📚 1. Bibliotecas Necessárias
+Para compilar este código, é necessário instalar:
+* **ESP32Servo**: Utilizada para o controle do servo motor que opera como registro de segurança.
+
+## 🛠️ 2. Itens do Simulador (Hardware)
+No Wokwi, utilize os seguintes componentes:
+* **ESP32 DevKit V1**.
+* **Potenciômetro** (Simulando o Sensor de Fluxo Hall YF-S201).
+* **Micro Servo Motor** (Representando a Válvula de Corte/Registro Geral).
+* **Pushbutton** (Botão de Reset/Reabertura manual).
+* **2 LEDs** (Azul para fluxo ativo e Vermelho para bloqueio).
+
+## 🔌 3. Guia de Conexão (Pinagem)
+| Componente | Pino no ESP32 | Função |
+| :--- | :--- | :--- |
+| **Sensor de Fluxo (SIG)** | D34 (Analog) | Leitura da intensidade da vazão |
+| **Servo Motor (PWM)** | D12 | Controle do Registro de Água |
+| **Botão de Reset** | D25 | Reabertura manual da válvula |
+| **LED Azul** | D19 | Status: Sistema Aberto / Fluxo Normal |
+| **LED Vermelho** | D4 | Status: Vazamento Detectado / Corte Ativo |
+
+## 🕹️ 4. Comportamento do Sistema
+Diferente de sensores de impacto, o HydroSense trabalha com a variável **Tempo x Intensidade**:
+
+1. **Monitoramento de Fluxo:** O sistema classifica a vazão em três categorias baseadas na leitura analógica:
+   - **BAIXA (< 1500):** Indica possíveis gotejamentos ou vazamentos em descargas.
+   - **NORMAL (1500 - 3000):** Uso comum (torneiras, chuveiros).
+   - **INTENSA (> 3000):** Possível torneira esquecida totalmente aberta ou cano rompido.
+2. **Lógica de Corte (30 segundos):** Se qualquer fluxo persistir ininterruptamente por mais de 30 segundos, o sistema entende como uma anomalia (vazamento ou esquecimento) e fecha o servo (posição 0°).
+3. **Reset de Segurança:** Após o corte, a válvula permanece fechada mesmo que o fluxo pare. A reabertura só ocorre via **Botão de Reset Físico** (Pino 25) ou comando remoto, forçando o usuário a verificar a causa do problema.
+
+
+
+## 🌍 5. Visão de Mundo Real e Sustentabilidade
+
+### Detecção de Vazamentos Silenciosos
+Na vida real, o sensor de fluxo YF-S201 possui uma turbina magnética interna. Cada vez que a água passa, ela gira e o sensor de **Efeito Hall** conta os pulsos. Em um gotejamento imperceptível, a turbina gira muito devagar, mas de forma constante. O HydroSense captura essa persistência que os hidrômetros comuns muitas vezes ignoram.
+
+
+
+### O Atuador de Corte (Retrofit)
+No protótipo, o Servo Motor representa o braço mecânico que gira um registro de esfera ou aciona uma **Válvula Solenoide**. 
+- **Sustentabilidade:** Evita o desperdício de milhares de litros de água potável.
+- **Prevenção de Danos:** Evita inundações que poderiam destruir móveis, pisos e eletrônicos, especialmente em apartamentos onde vazamentos afetam vizinhos.
+
+### Modo Manutenção
+O sistema prevê atualizações futuras para um "Modo Encher Piscina/Banheira", permitindo que o usuário desative temporariamente o timer de 30 segundos via aplicativo, garantindo conveniência sem perder a segurança a longo prazo.
+
+Link : https://wokwi.com/projects/456417552278824961
