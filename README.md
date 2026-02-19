@@ -10,47 +10,52 @@
 ## 🚨 O Problema
 O mercado atual de *Smart Homes* enfrenta três grandes barreiras:
 1. **O Custo da Modernização:** Eletrodomésticos com conectividade nativa (IoT) possuem preços proibitivos.
-2. **Desperdício Invisível:** O "consumo fantasma" em *standby* e vazamentos silenciosos de água geram impacto financeiro e ecológico constante.
-3. **Reação vs. Prevenção:** A maioria das soluções avulsas apenas avisa o problema. Quando ocorre um vazamento de gás ou inundação, o dano patrimonial já foi causado.
+2. **Desperdício Invisível:** O "consumo fantasma" e vazamentos silenciosos de água geram impacto financeiro e ecológico constante.
+3. **Reação vs. Prevenção:** Soluções comuns apenas notificam. No Kite, o sistema **age** antes que o dano patrimonial ocorra.
 
 ## 💡 A Solução: Ecossistema Kite
-O Kite é um kit de **Retrofit Residencial**. Transformamos infraestruturas analógicas em dispositivos inteligentes de forma acessível (plug-and-play). O diferencial é a **Automação Cruzada Proativa**: os módulos tomam decisões defensivas para garantir segurança ativa, atuando como uma apólice de seguro digital.
+O Kite é um kit de **Retrofit Residencial**. Transformamos infraestruturas analógicas em dispositivos inteligentes de forma acessível (plug-and-play). O diferencial é a **Automação Cruzada Proativa**: se o gás vaza, o sistema corta a energia para evitar faíscas. Se a água corre por muito tempo, o registro é fechado preventivamente.
 
 ---
 
 ## 🏗️ Arquitetura do Projeto (A Linha Sense)
 
 ### 💧 01. HydroSense (Gestão Hídrica)
-Monitoramento inteligente de fluxo para prevenção de inundações e desperdício.
-* **Vida Real:** Instalado em pontos de entrada (pias/chuveiros). Utiliza uma **Válvula Solenoide** ou **Atuador de Esfera** para o corte físico.
-* **Visão Técnica:** Sensor de **Efeito Hall** que conta pulsos magnéticos gerados por uma turbina interna. O ESP32 calcula a frequência dos pulsos para definir a vazão (L/min).
-* **Lógica de Proteção:** Classifica a vazão em Baixa, Normal ou Intensa. Se o fluxo for constante por >30s, o sistema bloqueia a água e aguarda um **Reset Manual** (via botão físico ou App).
+Monitoramento inteligente de fluxo para prevenção de inundações.
+* **Hardware:** Sensor de Fluxo (Efeito Hall), Servo Motor (Válvula) e Botão de Reset.
+* **Visão Técnica:** Utiliza temporizadores (`millis()`) para detectar anomalias. Se a vazão (baixa, normal ou intensa) persistir por mais de **30 segundos**, o sistema corta o suprimento.
+* **Diferencial:** Possui **Manual Override** via botão físico, permitindo que o morador restabeleça o fluxo localmente após verificar a segurança.
 
 
 ### 🔥 02. AeroSense (Segurança Ambiental)
 Sentinela contra vazamentos de gás (GLP/Natural) e princípios de incêndio.
-* **Vida Real:** Atua no corte preventivo da válvula de gás e comunicação com o EnergySense para evitar faíscas elétricas.
-* **Visão Técnica:** Sensor **MQ-2** que altera sua condutividade na presença de gases inflamáveis. O sinal analógico é processado pelo ESP32 em níveis de PPM (Partes por Milhão).
-* **Ação:** Alerta sonoro (Buzzer) e visual imediato.
+* **Hardware:** Sensor MQ-2, Display OLED, Buzzer e Servo Motor.
+* **Visão Técnica:** O sistema processa o nível de PPM (Partes por Milhão) em tempo real. 
+* **Ação Ativa:** Ao ultrapassar o limite de segurança (~1500 no simulador), o OLED exibe um alerta crítico, o alarme sonoro é disparado e a válvula de gás é fechada instantaneamente pelo servo motor.
 
 ### ⚡ 03. EnergySense (Gestão Energética)
 Smart Plugs para controle de consumo e proteção elétrica.
-* **Vida Real:** Permite desligar eletrodomésticos remotamente e monitorar gastos reais.
-* **Visão Técnica:** Sensor de corrente **ACS712** com isolamento galvânico. Um módulo Relé atua como o interruptor físico controlado pelo microcontrolador.
+* **Hardware:** Sensor de corrente ACS712 e Módulo Relé.
+* **Função:** Monitora o consumo em Amperes e permite o tagueamento de aparelhos como "Essencial" ou "Não Essencial", permitindo cortes inteligentes em situações de risco.
 
-### 🚪 04. CoreSense (O Cérebro / Painel)
-Interface física principal localizada na saída da residência. Permite o acionamento de perfis:
-* **Modo Casa:** Funcionamento padrão com monitoramento de fundo.
-* **Modo Ausente:** Corta gás preventivamente e desliga tomadas "Não Essenciais" (TVs, cafeteiras).
-* **Modo Férias:** Bloqueio total de água e gás com relatórios detalhados via nuvem.
+### 🚪 04. CoreSense (O Cérebro / Painel) - *Em Desenvolvimento*
+Interface física central para controle de perfis de usuário:
+* **Modo Casa:** Monitoramento padrão.
+* **Modo Ausente:** Automação proativa (Corte de gás e tomadas não essenciais).
+* **Modo Férias:** Bloqueio total de infraestrutura (água e gás) com relatórios remotos.
 
 ---
 
-## 🚀 Proposta de Valor e Modelo de Negócios
-* **Segurança Patrimonial:** Evita perdas severas com inundações ou incêndios.
-* **Sustentabilidade (ESG):** Redução drástica do desperdício hídrico e energético.
-* **Parcerias com Seguradoras:** Modelo B2B2C onde o cliente ganha descontos na apólice residencial ao possuir o kit instalado.
-* **SaaS Analytics:** Dashboard Premium focado em análise de dados cruzados para insights de economia real.
+## 🚀 Próximos Passos: Software & Integração
+
+### 📱 Aplicativo e Dashboard AnGa
+Estamos desenvolvendo uma interface centralizada que permitirá:
+1. **Controle Remoto:** Abrir/Fechar válvulas e tomadas de qualquer lugar.
+2. **Histórico de Consumo:** Gráficos detalhados de gasto hídrico e elétrico para análise ESG.
+3. **Notificações Push:** Alertas em tempo real de vazamentos ou picos de consumo.
+
+### 🔗 Integração em Nuvem
+Utilização de protocolos **MQTT/HTTP** para conectar os 4 dispositivos a um Broker central, permitindo que os sensores "conversem" entre si sem necessidade de fiação adicional.
 
 ---
 
@@ -58,8 +63,7 @@ Interface física principal localizada na saída da residência. Permite o acion
 * **Microcontrolador:** ESP32 (Wi-Fi/Bluetooth nativo)
 * **Linguagem:** C++ (Arduino Framework)
 * **Simulação:** Wokwi
-* **Atuadores:** Micro Servo Motor (Válvulas), Relés, Buzzer.
-* **Displays:** OLED SSD1306 (Feedback em tempo real).
+* **Displays:** OLED SSD1306 (I2C)
 
 ---
 
@@ -68,7 +72,7 @@ Interface física principal localizada na saída da residência. Permite o acion
 | Módulo | Link de Acesso | Status |
 | :--- | :--- | :--- |
 | ⚡ **EnergySense** | [Acessar Projeto](https://wokwi.com/projects/456412173957770241) | ✅ Estável |
-| 🔥 **AeroSense** | [Acessar Projeto](https://wokwi.com/projects/456414554766683137) | ✅ Estável |
-| 💧 **HydroSense** | [Acessar Projeto](https://wokwi.com/projects/456417552278824961) | ✅ Estável (Timer & Reset) |
+| 🔥 **AeroSense** | [Acessar Projeto](https://wokwi.com/projects/456414554766683137) | ✅ v2.0 (OLED & Corte) |
+| 💧 **HydroSense** | [Acessar Projeto](https://wokwi.com/projects/456417552278824961) | ✅ v2.2 (Timer & Reset) |
 
 ---
