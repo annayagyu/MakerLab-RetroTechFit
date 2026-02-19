@@ -1,51 +1,79 @@
-// Pinos dos Componentes - AeroSense
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <ESP32Servo.h>
+
+// Configurações do Display
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+// Pinos
 const int pinoGas = 34;
-const int pinoBuzzer = 23;      // <--- Atualizado para o seu novo pino!
+const int pinoBuzzer = 23;
+const int pinoServo = 13;
 const int pinoLedVerde = 18;
 const int pinoLedVermelho = 19;
 
-// Configuração de Sensibilidade (Ajustável)
-// No Wokwi, o sensor de gás costuma subir rápido quando você aproxima a fumaça
-const int limiteAlerta = 1500; 
+Servo valvulaGas;
+int limiteAlerta = 1500;
 
 void setup() {
   Serial.begin(115200);
   
-  // Configurando os pinos de saída
+  // Inicializa Display OLED
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+    Serial.println(F("Falha no OLED"));
+    for(;;);
+  }
+  
+  valvulaGas.attach(pinoServo);
   pinMode(pinoBuzzer, OUTPUT);
   pinMode(pinoLedVerde, OUTPUT);
   pinMode(pinoLedVermelho, OUTPUT);
-  
-  Serial.println("AeroSense Inicializado - Vigilância de Ar Ativa");
+
+  valvulaGas.write(90); // Inicia com a válvula aberta
+  display.clearDisplay();
+  display.setTextColor(WHITE);
 }
 
 void loop() {
-  // 1. Lê o nível de gás/fumaça (Valor de 0 a 4095)
   int nivelGas = analogRead(pinoGas);
   
-  // Mostra no monitor serial para você calibrar se precisar
-  Serial.print("Nivel de Gas: ");
-  Serial.println(nivelGas);
+  // Interface no Display
+  display.clearDisplay();
+  display.setCursor(0,0);
+  display.setTextSize(1);
+  display.println("ANGATECH - AEROSENSE");
+  display.drawLine(0, 12, 128, 12, WHITE);
+  
+  display.setCursor(0, 25);
+  display.setTextSize(2);
+  display.print("GAS: ");
+  display.print(nivelGas); 
 
-  // 2. Lógica de Segurança (Alerta Crítico)
   if (nivelGas > limiteAlerta) {
     // --- ESTADO DE PERIGO ---
-    digitalWrite(pinoLedVerde, LOW);     // Apaga o verde
-    digitalWrite(pinoLedVermelho, HIGH); // Acende o vermelho (Alerta visual)
+    display.setCursor(0, 50);
+    display.setTextSize(1);
+    display.println("!!! PERIGO - CORTE !!!");
     
-    // Alerta Sonoro de Emergência (Intermitente para chamar atenção)
-    tone(pinoBuzzer, 1000); // Som de 1kHz (agudo)
-    delay(150);             // Beep rápido
-    noTone(pinoBuzzer);
-    delay(150);
-    
-    Serial.println("!!! PERIGO: VAZAMENTO OU FUMAÇA DETECTADOS !!!");
+    digitalWrite(pinoLedVerde, LOW);
+    digitalWrite(pinoLedVermelho, HIGH);
+    valvulaGas.write(0); // Fecha a válvula de gás
+    tone(pinoBuzzer, 1000, 200); // Alerta sonoro
   } else {
     // --- ESTADO SEGURO ---
-    digitalWrite(pinoLedVerde, HIGH);    // Mantém o verde aceso
+    display.setCursor(0, 50);
+    display.setTextSize(1);
+    display.println("STATUS: AMBIENTE SEGURO");
+    
+    digitalWrite(pinoLedVerde, HIGH);
     digitalWrite(pinoLedVermelho, LOW);
-    noTone(pinoBuzzer);                 // Garante que o alarme fique quieto
+    valvulaGas.write(90); // Válvula permanece aberta
+    noTone(pinoBuzzer);
   }
 
-  delay(100); // Pequena pausa para o processamento não "fritar"
+  display.display();
+  delay(500);
 }
