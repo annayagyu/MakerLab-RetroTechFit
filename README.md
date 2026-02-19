@@ -43,5 +43,5 @@ Para o protótipo (MVP), focaremos na automação de um ambiente crítico, utili
 * **Conectividade & Dados:** Plataforma IoT para comunicação em tempo real e alimentação do Dashboard de Analytics.
 
 ## 🔗 Links e Documentação
-* **Simulação Virtual:** 
-* **Esquemático / Diagrama de Blocos:** 
+* **Simulação Virtual:** EnergySense https://wokwi.com/projects/456412173957770241
+* **Esquemático / Diagrama de Blocos:** assets de cada gadget
