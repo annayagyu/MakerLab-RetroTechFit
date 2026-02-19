@@ -1,0 +1,51 @@
+# 🔥 AeroSense: Documentação Técnica
+
+O **AeroSense** é o módulo de segurança ambiental focado na detecção precoce de gases inflamáveis (GLP e Gás Natural) e fumaça, atuando preventivamente para evitar explosões e intoxicações.
+
+## 📚 1. Bibliotecas Necessárias
+Para compilar este código, é necessário instalar as seguintes livrarias no Library Manager da Arduino IDE (ou adicionar no `diagram.json` do Wokwi):
+* **Adafruit SSD1306**: Controle do display OLED.
+* **Adafruit GFX Library**: Biblioteca base para gráficos no display.
+* **ESP32Servo**: Controle preciso do motor servo no ESP32.
+* **Wire**: Comunicação I2C (nativa do ESP32).
+
+## 🛠️ 2. Itens do Simulador (Hardware)
+No Wokwi, utilize os seguintes componentes:
+* **ESP32 DevKit V1**.
+* **Potenciômetro** (Simulando o Sensor de Gás MQ-2).
+* **Display OLED SSD1306** (128x64 pixels).
+* **Micro Servo Motor** (Representando a Válvula de Corte).
+* **Piezo Buzzer** (Alarme sonoro).
+* **2 LEDs** (Verde e Vermelho) + **Resistores de 220Ω**.
+
+## 🔌 3. Guia de Conexão (Pinagem)
+| Componente | Pino no ESP32 | Função |
+| :--- | :--- | :--- |
+| **Sensor de Gás (SIG)** | D34 (Analog) | Leitura da concentração de gás |
+| **Servo Motor (PWM)** | D13 | Controle da Válvula de Corte |
+| **Buzzer (+)** | D23 | Alarme sonoro de perigo |
+| **LED Verde** | D18 | Indicador de Ambiente Seguro |
+| **LED Vermelho** | D19 | Indicador de Perigo/Vazamento |
+| **OLED SDA** | D21 | Dados da comunicação I2C |
+| **OLED SCL** | D22 | Clock da comunicação I2C |
+
+## 🕹️ 4. Comportamento do Sistema
+* **Ambiente Seguro (Leitura < 1500):** O display exibe "AMBIENTE SEGURO", o LED verde permanece aceso e a válvula (servo) fica em 90° (posição aberta).
+* **Detecção de Vazamento (Leitura > 1500):** O display muda para "!!! PERIGO - CORTE !!!", o LED vermelho acende, o buzzer emite alertas sonoros e a válvula gira para 0° imediatamente, simulando o bloqueio da passagem de gás.
+
+> **Nota Técnica sobre a Escala:** No simulador, a leitura analógica de **1500** representa o limiar de transição entre **0.7 ppm** (seguro) e **0.8 ppm** (alerta). O código utiliza a resolução de 12 bits do ESP32 (0-4095) para processar essa sensibilidade.
+
+## 🌍 5. Visão de Mundo Real e Saúde
+
+### Segurança Ativa e Automação
+Na vida real, o AeroSense não apenas "avisa". Ele é conectado diretamente à tubulação de gás da residência. Ao detectar um nível crítico, o sistema aciona uma **Válvula Solenoide** ou um **Atuador de Retrofit** que fecha fisicamente o registro, interrompendo o suprimento antes que uma centelha elétrica cause um desastre. Além disso, ele envia o sinal para o *EnergySense* desligar tomadas próximas para evitar faíscas de ignição.
+
+
+
+### Níveis de Gás e Riscos à Saúde
+A sensibilidade do sensor é calibrada em **PPM (Partes por Milhão)**. É fundamental entender os limites de exposição:
+* **Até 1000 PPM:** Nível aceitável em ambientes com ventilação normal.
+* **1000 - 2000 PPM:** Estado de Alerta. Pode causar leve sonolência ou dor de cabeça em exposições prolongadas. **(Nosso limite de segurança para corte automático)**.
+* **Acima de 5000 PPM:** Crítico. Alto risco de asfixia e perigo iminente de explosão em caso de qualquer centelha elétrica.
+
+Link : https://wokwi.com/projects/456414554766683137
